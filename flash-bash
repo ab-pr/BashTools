@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+set -e  # Exit immediately if a command exits with a non-zero status
+
+# Clear the terminal
+clear
+
+lsblk
+
+echo -e "\n\n\n\033[31mWARNING: USING THIS TOOL CAN BE DESTRUCTIVE! USE AT YOUR OWN RISK.\033[0m\n\n\n"
+
+read -p "Enter device to write to (e.g., /dev/sdb): " device
+
+if [ ! -b "$device" ]; then
+    echo -e "\033[31mError: Device '$device' not found or is not a block device.\033[0m"
+    exit 1
+fi
+
+read -p "Enter image file to write from: " image
+
+if [ ! -f "$image" ]; then
+    echo -e "\033[31mError: Image file '$image' not found.\033[0m"
+    exit 1
+fi
+
+echo -e "\nSelected device:"
+lsblk "$device"
+
+echo -e "\n\033[33mYou are about to write the image '$image' to the device '$device'.\033[0m"
+read -p "This will erase all data on the device. Are you sure you want to proceed? [y/N]: " confirm
+
+if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+    echo "Operation cancelled."
+    exit 1
+fi
+
+echo -e "\n\033[36mWriting image to device...\033[0m"
+sudo dd if="$image" of="$device" bs=4M status=progress oflag=sync
+
+echo -e "\n\033[32mOperation completed successfully.\033[0m"
+1M status=progress
