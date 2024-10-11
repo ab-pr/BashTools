@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+
+set -e 
+
+if [ "$#" -lt 3 ]; then
+    echo "Usage: $0 <archive-format> <input-file(s)> <output-filename>"
+    exit 1
+fi
+
+archive_format="$1"
+output_filename="${@: -1}" # Last argument is the output filename
+input_files="${@:2:$(($# - 2))}" # All arguments from $2 to the second last one
+
+# Check if input files exist
+for file in $input_files; do
+    if [ ! -f "$file" ]; then
+        echo "Error: Input file '$file' not found."
+        exit 1
+    fi
+done
+
+# Create the archive
+case "$archive_format" in
+    zip)
+        extension="zip"
+        zip -r "${output_filename}.${extension}" $input_files
+        ;;
+    tar)
+        extension="tar"
+        tar cvf "${output_filename}.${extension}" $input_files
+        ;;
+    tar.gz)
+        extension="tar.gz"
+        tar cvzf "${output_filename}.${extension}" $input_files
+        ;;
+    tar.bz2)
+        extension="tar.bz2"
+        tar cvjf "${output_filename}.${extension}" $input_files
+        ;;
+    tar.xz)
+        extension="tar.xz"
+        tar cvJf "${output_filename}.${extension}" $input_files
+        ;;
+    *)
+        echo "Error: Unsupported archive format '$archive_format'"
+        exit 1
+        ;;
+esac
+
+echo "Archive created: ${output_filename}.${extension}"
+
